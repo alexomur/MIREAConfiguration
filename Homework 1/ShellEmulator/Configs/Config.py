@@ -1,5 +1,5 @@
-import json, os
+import toml, os
 
 def get_config():
-    with open("Configs/config.json") as f:
-        return json.load(f)
+    with open("Configs/config.toml") as f:
+        return toml.load(f)
