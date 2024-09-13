@@ -1,4 +1,4 @@
-import toml, os
+import toml
 
 def get_config() -> dict:
     with open("Configs/config.toml") as f:

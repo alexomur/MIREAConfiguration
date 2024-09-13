@@ -2,10 +2,10 @@
 I'll start with a preface that I really wanted to do the Homework in C# or something more interesting.
 But then I read 2-4 assignments and realized that Python is my choice.
 """
-import os.path, shlex, zipfile, tempfile
+import shlex
 
 from zip_handler import extract_zip
-from Classes import get_command
+from commands import get_command
 from Configs import Config
 
 # Global variables and setters accessible from all files
