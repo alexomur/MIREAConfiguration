@@ -10,9 +10,10 @@ from Configs import Config
 exiting: bool = False
 global_path: str
 current_path: str = ""
+config: dict = Config.get_config()
 
 def extract_zip():
-    with zipfile.ZipFile(Config.get_config()["path_to_zip"], "r") as zip_f:
+    with zipfile.ZipFile(config["path_to_zip"], "r") as zip_f:
         temp_dir = tempfile.mkdtemp()
         zip_f.extractall(temp_dir)
         return temp_dir
@@ -29,7 +30,7 @@ def main() -> None:
     }
 
     while not exiting:
-        line: str = input(f"{current_path}> ")
+        line: str = input(f"{config['username']}{current_path}> ")
         if len(line) == 0:
             continue
 
