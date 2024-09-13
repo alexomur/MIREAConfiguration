@@ -3,6 +3,7 @@ import zipfile, os, tempfile
 
 # Peace of terrible code from cyberforum translated from python 2
 # But it works and I don't want to touch it ever again
+# UPD: Ive been forced to touch it because it stopped working with Win11 :sad:
 def extract_zip(path):
     with zipfile.ZipFile(path, "r") as zip_f:
         temp_dir = tempfile.mkdtemp()
