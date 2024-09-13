@@ -17,4 +17,4 @@ def get_command(command_name: str) -> Command or None:
     return None
 
 
-__all__ = ["Command", "Exit", "List", "Cd"]
+__all__ = ["get_command", "Command", "Exit", "List", "Cd"]
