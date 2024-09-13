@@ -13,6 +13,13 @@ exiting: bool = False
 global_path: str
 current_path: str = "/"
 config: dict = Config.get_config()
+command_history = []
+
+def get_command_history():
+    return command_history
+
+def add_command_history(command: str):
+    command_history.append(command)
 
 def set_exiting(new_value: bool) -> None:
     global exiting
