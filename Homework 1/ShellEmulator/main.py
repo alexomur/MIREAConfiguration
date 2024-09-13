@@ -6,7 +6,7 @@ import shlex
 
 from zip_handler import extract_zip
 from commands import get_command
-from configs import Config
+from configs import сonfig_utils
 
 # Global variables and setters accessible from all files
 exiting: bool = False
