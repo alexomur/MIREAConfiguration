@@ -1,4 +1,4 @@
-from .Command import Command
+from .command_abc import Command
 import __main__ as main
 import os
 from .utils import resolve_path

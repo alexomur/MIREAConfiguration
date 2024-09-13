@@ -1,7 +1,7 @@
-from .Command import Command
-from .Exit import Exit
-from .List import List
-from .Cd import Cd
+from .command_abc import Command
+from .exit_command import Exit
+from .list_command import List
+from .cd_command import Cd
 
 
 def get_command(command_name: str) -> Command or None:
