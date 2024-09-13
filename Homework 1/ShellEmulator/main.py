@@ -4,12 +4,12 @@ But then I read 2-4 assignments and realized that Python is my choice.
 """
 import os.path, shlex, zipfile, tempfile
 
-from Classes import *
+from Classes import get_command
 from Configs import Config
 
 exiting: bool = False
 global_path: str
-current_path: str = ""
+current_path: str = "/"
 config: dict = Config.get_config()
 
 def set_exiting(new_value: bool) -> None:
@@ -48,21 +48,15 @@ def main() -> None:
 
     global_path = extract_zip()
 
-    known_commands = {
-        "ls": List(),
-        "exit": Exit(),
-        "cd": Cd(),
-    }
-
     while not exiting:
-        line: str = input(f"{config['username']}:/{current_path}# ")
+        line: str = input(f"{config['username']}:{current_path}# ")
         if len(line) == 0:
             continue
 
         command_name: str = line.split()[0]
 
-        args = shlex.split(''.join(line.split()[1:]))
-        if command := known_commands.get(command_name):
+        args = shlex.split(line)[1:]
+        if command := get_command(command_name):
             command.execute(args)
         else:
             print(f"Unknown command: {command_name}")
