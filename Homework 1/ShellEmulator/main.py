@@ -12,7 +12,7 @@ from configs import сonfig_utils
 exiting: bool = False
 global_path: str
 current_path: str = "/"
-config: dict = Config.get_config()
+config: dict = сonfig_utils.get_config()
 command_history = []
 
 def get_command_history():
