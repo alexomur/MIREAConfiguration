@@ -25,12 +25,23 @@ def set_global_path(new_value: str) -> None:
     global_path = new_value
 
 
+# Peace of terrible code from cyberforum translated from python 2
+# But it works and I don't want to touch it ever again
 def extract_zip():
     with zipfile.ZipFile(config["path_to_zip"], "r") as zip_f:
         temp_dir = tempfile.mkdtemp()
-        zip_f.extractall(temp_dir)
-        print(temp_dir)
-        return temp_dir
+        for name in zip_f.namelist():
+            unicode_name = name.encode("cp437").decode("cp866")
+            fullpath = os.path.join(temp_dir, unicode_name)
+            if name.endswith('/'):
+                os.makedirs(fullpath, exist_ok=True)
+            else:
+                os.makedirs(os.path.dirname(fullpath), exist_ok=True)
+                with zip_f.open(name, "r") as f:
+                    content = f.read()
+                    with open(fullpath, "wb") as output_file:
+                        output_file.write(content)
+    return temp_dir
 
 def main() -> None:
     global exiting, global_path, current_path
@@ -44,7 +55,7 @@ def main() -> None:
     }
 
     while not exiting:
-        line: str = input(f"{config['username']} {current_path}> ")
+        line: str = input(f"{config['username']}:/{current_path}# ")
         if len(line) == 0:
             continue
 
