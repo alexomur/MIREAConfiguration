@@ -1,20 +1,14 @@
 from .command_abc import Command
 
-# Используем модуль dateparser или вручную обрабатываем выражения
-# Для простоты используем встроенные возможности datetime
-# Пример: "next Monday", "+5 days", "-2 weeks"
-# Заметим, что datetime.strptime не поддерживает такие выражения
-# Поэтому используем метод fromisoformat или другое ограниченное парсинг
-# Для полноты можно использовать библиотеку dateutil.parser
-
-from dateutil import parser as date_parser
-from dateutil.relativedelta import relativedelta
-
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
-import argparse
+from datetime import datetime
 from typing import List
 
+"""
+Just for the sake of testing... I gave ChatGPT-5-Preview the task of mimicking my code
+And it wrote this class
+
+At what point I stopped writing the code myself, is left for the observer to ponder
+"""
 class Date(Command):
     name: str = "date"
     aliases: List[str] = []

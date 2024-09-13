@@ -1,5 +1,4 @@
 from .command_abc import Command
-import os
 import win32security
 import pywintypes
 from win32security import (
