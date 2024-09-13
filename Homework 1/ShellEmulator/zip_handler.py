@@ -1,14 +1,17 @@
 import zipfile, os, tempfile
-from Configs import Config
-from __main__ import config
 
 # Peace of terrible code from cyberforum translated from python 2
 # But it works and I don't want to touch it ever again
-def extract_zip():
-    with zipfile.ZipFile(config["path_to_zip"], "r") as zip_f:
+def extract_zip(path):
+    with zipfile.ZipFile(path, "r") as zip_f:
         temp_dir = tempfile.mkdtemp()
         for name in zip_f.namelist():
-            unicode_name = name.encode("cp437").decode("cp866")
+            try:
+                unicode_name = name.encode("utf-8").decode("utf-8")
+            except UnicodeDecodeError:
+                print(f"Error decoding file name: {name}")
+                continue
+
             fullpath = os.path.join(temp_dir, unicode_name)
             if name.endswith('/'):
                 os.makedirs(fullpath, exist_ok=True)

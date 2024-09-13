@@ -31,7 +31,7 @@ def set_global_path(new_value: str) -> None:
 def main() -> None:
     global exiting, global_path, current_path
 
-    global_path = extract_zip()
+    global_path = extract_zip(config['path_to_zip'])
 
     while not exiting:
         line: str = input(f"{config['username']}:{current_path}# ")
