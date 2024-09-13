@@ -11,5 +11,18 @@ class Cd(Command):
         if len(arguments) == 0:
             print(f"{self.name} requires at least one argument")
             return False
-        main.set_current_path(os.path.join(main.current_path, arguments[0]))
+
+        new_path = arguments[0]
+        if not os.path.isabs(new_path):
+            new_virtual_path = os.path.normpath(os.path.join(main.current_path, new_path)).replace(os.sep, "/")
+            new_real_path = os.path.join(main.global_path, new_virtual_path.lstrip("/").replace("/", os.sep))
+        else:
+            new_virtual_path = os.path.normpath(new_path).replace(os.sep, "/")
+            new_real_path = os.path.join(main.global_path, new_virtual_path.lstrip("/").replace("/", os.sep))
+
+        if not os.path.isdir(new_real_path):
+            print(f"Error: Directory '{new_virtual_path}' does not exist.")
+            return False
+
+        main.set_current_path(new_virtual_path)
         return True
