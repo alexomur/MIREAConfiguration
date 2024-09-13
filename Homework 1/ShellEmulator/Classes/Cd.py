@@ -1,5 +1,5 @@
 from .Command import Command
-import __main__
+import __main__ as main
 import os
 
 class Cd(Command):
@@ -11,7 +11,5 @@ class Cd(Command):
         if len(arguments) == 0:
             print(f"{self.name} requires at least one argument")
             return False
-        __main__.current_direction = os.path.join(__main__.current_path, arguments[0])
-        print(os.path.join(__main__.current_path, arguments[0]))
-
+        main.set_current_path(os.path.join(main.current_path, arguments[0]))
         return True

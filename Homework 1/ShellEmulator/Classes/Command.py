@@ -1,5 +1,4 @@
-from abc import ABC, abstractmethod, abstractproperty
-
+from abc import ABC, abstractmethod
 
 class Command(ABC):
     name: str

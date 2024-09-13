@@ -12,10 +12,24 @@ global_path: str
 current_path: str = ""
 config: dict = Config.get_config()
 
+def set_exiting(new_value: bool) -> None:
+    global exiting
+    exiting = new_value
+
+def set_current_path(new_value: str) -> None:
+    global current_path
+    current_path = new_value
+
+def set_global_path(new_value: str) -> None:
+    global global_path
+    global_path = new_value
+
+
 def extract_zip():
     with zipfile.ZipFile(config["path_to_zip"], "r") as zip_f:
         temp_dir = tempfile.mkdtemp()
         zip_f.extractall(temp_dir)
+        print(temp_dir)
         return temp_dir
 
 def main() -> None:
@@ -30,7 +44,7 @@ def main() -> None:
     }
 
     while not exiting:
-        line: str = input(f"{config['username']}{current_path}> ")
+        line: str = input(f"{config['username']} {current_path}> ")
         if len(line) == 0:
             continue
 

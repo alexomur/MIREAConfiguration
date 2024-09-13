@@ -1,5 +1,6 @@
 from .Command import Command
 import typing
+import __main__ as main
 
 class Exit(Command):
     name: str = "exit"
@@ -7,4 +8,4 @@ class Exit(Command):
     description: str = "Stops the application"
 
     def execute(self, arguments: list[str]) -> typing.NoReturn:
-        exit(0)
+        main.set_exiting(True)
