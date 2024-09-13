@@ -3,10 +3,11 @@ from .exit_command import Exit
 from .list_command import List
 from .cd_command import Cd
 from .date_command import Date
+from .chown_command import Chown
 
 
 def get_command(command_name: str) -> Command or None:
-    commands = [Exit, List, Cd, Date]
+    commands = [Exit, List, Cd, Date, Chown]
 
     for command_class in commands:
         if command_class.name == command_name:
@@ -18,4 +19,4 @@ def get_command(command_name: str) -> Command or None:
     return None
 
 
-__all__ = ["get_command", "Command", "Exit", "List", "Cd", "Date"]
+__all__ = ["get_command", "Command", "Exit", "List", "Cd", "Date", "Chown"]
