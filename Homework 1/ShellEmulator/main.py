@@ -4,9 +4,11 @@ But then I read 2-4 assignments and realized that Python is my choice.
 """
 import os.path, shlex, zipfile, tempfile
 
+from zip_handler import extract_zip
 from Classes import get_command
 from Configs import Config
 
+# Global variables and setters accessible from all files
 exiting: bool = False
 global_path: str
 current_path: str = "/"
@@ -25,24 +27,7 @@ def set_global_path(new_value: str) -> None:
     global_path = new_value
 
 
-# Peace of terrible code from cyberforum translated from python 2
-# But it works and I don't want to touch it ever again
-def extract_zip():
-    with zipfile.ZipFile(config["path_to_zip"], "r") as zip_f:
-        temp_dir = tempfile.mkdtemp()
-        for name in zip_f.namelist():
-            unicode_name = name.encode("cp437").decode("cp866")
-            fullpath = os.path.join(temp_dir, unicode_name)
-            if name.endswith('/'):
-                os.makedirs(fullpath, exist_ok=True)
-            else:
-                os.makedirs(os.path.dirname(fullpath), exist_ok=True)
-                with zip_f.open(name, "r") as f:
-                    content = f.read()
-                    with open(fullpath, "wb") as output_file:
-                        output_file.write(content)
-    return temp_dir
-
+# Main loop
 def main() -> None:
     global exiting, global_path, current_path
 

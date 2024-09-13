@@ -1,6 +1,7 @@
 from .Command import Command
 import __main__ as main
 import os
+from .utils import resolve_path
 
 class List(Command):
     name: str = "list"
@@ -8,20 +9,17 @@ class List(Command):
     description: str = "List of files in directory"
 
     def execute(self, arguments: list[str]) -> bool:
+        # Используем resolve_directory для поиска директории
         if len(arguments) == 0:
-            virtual_directory = main.current_path
-            real_directory = os.path.join(main.global_path, virtual_directory.lstrip("/").replace("/", os.sep))
+            virtual_directory, real_directory = resolve_path(main.current_path)
         else:
-            virtual_directory = arguments[0]
-            if not os.path.isabs(virtual_directory):
-                virtual_directory = os.path.normpath(os.path.join(main.current_path, virtual_directory)).replace(os.sep, "/")
-            real_directory = os.path.join(main.global_path, virtual_directory.lstrip("/").replace("/", os.sep))
+            virtual_directory, real_directory = resolve_path(arguments[0])
 
-        if not os.path.isdir(real_directory):
+        if real_directory is None:
             print(f"Error: Directory '{virtual_directory}' does not exist.")
             return False
 
-        files = os.listdir(str(real_directory))
+        files = os.listdir(real_directory)
 
         for file in files:
             print(file)
