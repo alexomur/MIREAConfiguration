@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from .command_abc import Command
 import __main__ as main
 import os
@@ -8,7 +10,7 @@ class List(Command):
     aliases: list[str] = ["ls", "dir"]
     description: str = "Lists files in the specified directory."
 
-    def execute(self, arguments: list[str]) -> bool:
+    def execute(self, arguments: list[str]) -> Tuple[bool, str]:
         """
         :param arguments: List of command-line arguments.
         :return: True if executed successfully, False otherwise.
@@ -20,23 +22,20 @@ class List(Command):
                 virtual_directory, real_directory = resolve_path(arguments[0])
 
             if real_directory is None:
-                print(f"Error: Directory '{virtual_directory}' does not exist.")
-                return False
+                return False, f"Error: Directory '{virtual_directory}' does not exist."
 
             try:
                 files = os.listdir(real_directory)
             except PermissionError:
-                print(f"Error: Permission denied for directory '{virtual_directory}'.")
-                return False
+                return False, f"Error: Permission denied for directory '{virtual_directory}'."
             except Exception as e:
-                print(f"Error accessing directory '{virtual_directory}': {e}")
-                return False
+                return False, f"Error accessing directory '{virtual_directory}': {e}"
 
+            output = ""
             for file in files:
-                print(file)
+                output += f"{file}\n"
 
-            return True
+            return True, output[:-1]
 
         except Exception as e:
-            print(f"General error: {e}")
-            return False
+            return False, f"General error: {e}"

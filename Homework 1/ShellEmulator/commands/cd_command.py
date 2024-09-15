@@ -1,31 +1,29 @@
 from .command_abc import Command
 import __main__ as main
 from .utils import resolve_path
+from typing import Tuple
 
 class Cd(Command):
     name: str = "change_direction"
     aliases: list[str] = ["cd"]
     description: str = "Changes the current directory."
 
-    def execute(self, arguments: list[str]) -> bool:
+    def execute(self, arguments: list[str]) -> Tuple[bool, str]:
         """
         :param arguments: List of command-line arguments.
-        :return: True if executed successfully, False otherwise.
+        :return: True if executed successfully, False otherwise. Out str - something to print
         """
         try:
             if not arguments:
-                print(f"{self.name} requires at least one argument.")
-                return False
+                return False, f"{self.name} requires at least one argument."
 
             virtual_directory, real_directory = resolve_path(arguments[0])
 
             if real_directory is None:
-                print(f"Error: Directory '{virtual_directory}' does not exist.")
-                return False
+                return False, f"Error: Directory '{arguments[0]}' does not exist."
 
             main.set_current_path(virtual_directory)
-            return True
+            return True, ""
 
         except Exception as e:
-            print(f"General error: {e}")
-            return False
+            return False, f"General error: {e}"

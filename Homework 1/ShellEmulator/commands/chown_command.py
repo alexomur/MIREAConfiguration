@@ -9,6 +9,7 @@ from win32security import (
 )
 from typing import List, Optional
 from .utils import resolve_path
+from typing import Tuple
 
 
 class Chown(Command):
@@ -16,17 +17,14 @@ class Chown(Command):
     aliases: List[str] = []
     description: str = "Changes the owner and/or group of a file or directory."
 
-    def execute(self, arguments: List[str]) -> bool:
+    def execute(self, arguments: List[str]) -> Tuple[bool, str]:
         """
         :param arguments: List of command-line arguments.
         :return: True if executed successfully, False otherwise.
         """
         try:
             if len(arguments) < 2:
-                print("Error: 'chown' requires at least two arguments.")
-                print("Usage:")
-                print("  chown <owner>[:<group>] <file>...")
-                return False
+                return False, "Error: 'chown' requires at least two arguments.\nUsage:\n  chown <owner>[:<group>] <file>..."
 
             owner_group = arguments[0]
             files = arguments[1:]
@@ -35,7 +33,7 @@ class Chown(Command):
                 owner, group = owner_group.split(':', 1)
                 group_sid = self.get_group_sid(group)
                 if group_sid is None:
-                    return False
+                    return False, ""
                 security_info = OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION
             else:
                 owner = owner_group
@@ -44,19 +42,16 @@ class Chown(Command):
 
             owner_sid = self.get_user_sid(owner)
             if owner_sid is None:
-                print(f"Error: User '{owner}' does not exist.")
-                return False
+                return False, f"Error: User '{owner}' does not exist."
 
             for file in files:
                 resolved = resolve_path(file)
                 if not resolved or resolved == (None, None):
-                    print(f"Error: File or directory '{file}' does not exist.")
-                    continue
+                    return False, f"Error: File or directory '{file}' does not exist."
 
                 virtual_path, real_path = resolved
 
                 try:
-                    # Устанавливаем владельца и/или группу с помощью SetNamedSecurityInfo
                     SetNamedSecurityInfo(
                         real_path,
                         SE_FILE_OBJECT,
@@ -66,17 +61,14 @@ class Chown(Command):
                         None,
                         None
                     )
-                    print(f"Successfully changed ownership of '{virtual_path}'")
+                    return True, f"Successfully changed ownership of '{virtual_path}'"
                 except pywintypes.error as e:
-                    print(f"Error changing ownership of '{virtual_path}': {e}")
+                    return True, f"Error changing ownership of '{virtual_path}': {e}"
                 except Exception as e:
-                    print(f"Error changing ownership of '{virtual_path}': {e}")
-
-            return True
+                    return True, f"Error changing ownership of '{virtual_path}': {e}"
 
         except Exception as e:
-            print(f"General error: {e}")
-            return False
+            return False, f"General error: {e}"
 
     @staticmethod
     def get_user_sid(username: str) -> Optional[pywintypes.SID]:

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
+from typing import Tuple
 
 class Command(ABC):
     name: str
@@ -7,5 +8,5 @@ class Command(ABC):
     description: str
 
     @abstractmethod
-    def execute(self, arguments: list[str]) -> bool:
+    def execute(self, arguments: list[str]) -> Tuple[bool, str]:
         pass

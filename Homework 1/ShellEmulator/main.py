@@ -49,7 +49,9 @@ def main() -> None:
 
         args = shlex.split(line)[1:]
         if command := get_command(command_name):
-            command.execute(args)
+            success, output = command.execute(args)
+            if output:
+                print(output)
         else:
             print(f"Unknown command: {command_name}")
 

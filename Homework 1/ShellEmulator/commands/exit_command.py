@@ -1,6 +1,6 @@
 from .command_abc import Command
 import __main__ as main
-from typing import List
+from typing import List, Tuple
 
 
 class Exit(Command):
@@ -8,21 +8,17 @@ class Exit(Command):
     aliases: List[str] = []
     description: str = "Stops the application."
 
-    def execute(self, arguments: List[str]) -> bool:
+    def execute(self, arguments: List[str]) -> Tuple[bool, str]:
         """
         :param arguments: List of command-line arguments.
         :return: True if executed successfully, False otherwise.
         """
         try:
             if arguments:
-                print("Error: 'exit' command does not accept any arguments.")
-                print("Usage:")
-                print("  exit")
-                return False
+                return False, "Error: 'exit' command does not accept any arguments.\nUsage:\n  exit"
 
             main.set_exiting(True)
-            return True
+            return True, ""
 
         except Exception as e:
-            print(f"General error: {e}")
-            return False
+            return False, f"General error: {e}"

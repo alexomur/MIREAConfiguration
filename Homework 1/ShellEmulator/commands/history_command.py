@@ -1,6 +1,6 @@
 from .command_abc import Command
 import __main__ as main
-from typing import List
+from typing import List, Tuple
 
 
 class History(Command):
@@ -8,31 +8,29 @@ class History(Command):
     aliases: List[str] = []
     description: str = "Displays the command history."
 
-    def execute(self, arguments: List[str]) -> bool:
+    def execute(self, arguments: List[str]) -> Tuple[bool, str]:
         """
         :param arguments: List of command-line arguments.
         :return: True if executed successfully, False otherwise.
         """
         try:
+            history: str
             if arguments:
                 if arguments[0].isdigit():
                     num = int(arguments[0])
-                    self.print_history(num)
+                    history = self.get_history(num)
                 else:
-                    print(f"Error: Invalid argument '{arguments[0]}' for 'history'.")
-                    print("Usage: history [N]")
-                    return False
+                    return False, f"Error: Invalid argument '{arguments[0]}' for 'history'.\nUsage:\n  history [N]"
             else:
-                self.print_history()
+                history = self.get_history()
 
-            return True
+            return True, history
 
         except Exception as e:
-            print(f"General error: {e}")
-            return False
+            return False, f"General error: {e}"
 
     @staticmethod
-    def print_history(num: int = None) -> None:
+    def get_history(num: int = None) -> str:
         history = main.get_command_history()
 
         if num is not None:
@@ -40,4 +38,4 @@ class History(Command):
 
         # Печатаем команды с их номерами
         for idx, command in enumerate(history, start=1):
-            print(f"{idx}  {command}")
+            return f"{idx}  {command}"
