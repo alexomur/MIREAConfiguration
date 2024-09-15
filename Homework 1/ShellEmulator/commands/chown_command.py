@@ -20,7 +20,7 @@ class Chown(Command):
     def execute(self, arguments: List[str]) -> Tuple[bool, str]:
         """
         :param arguments: List of command-line arguments.
-        :return: True if executed successfully, False otherwise.
+        :return: True if executed successfully, False otherwise. Out str - something to print
         """
         try:
             if len(arguments) < 2:
