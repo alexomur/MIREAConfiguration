@@ -3,6 +3,7 @@ import __main__ as main
 from .utils import resolve_path
 from typing import Tuple
 
+
 class Cd(Command):
     name: str = "change_direction"
     aliases: list[str] = ["cd"]

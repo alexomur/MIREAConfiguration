@@ -15,19 +15,24 @@ current_path: str = "/"
 config: dict = сonfig_utils.get_config()
 command_history = []
 
+
 def get_command_history():
     return command_history
 
+
 def add_command_history(command: str):
     command_history.append(command)
+
 
 def set_exiting(new_value: bool) -> None:
     global exiting
     exiting = new_value
 
+
 def set_current_path(new_value: str) -> None:
     global current_path
     current_path = new_value
+
 
 def set_global_path(new_value: str) -> None:
     global global_path
@@ -54,6 +59,7 @@ def main() -> None:
                 print(output)
         else:
             print(f"Unknown command: {command_name}")
+
 
 if __name__ == '__main__':
     main()

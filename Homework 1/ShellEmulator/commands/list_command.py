@@ -5,6 +5,7 @@ import __main__ as main
 import os
 from .utils import resolve_path
 
+
 class List(Command):
     name: str = "list"
     aliases: list[str] = ["ls", "dir"]

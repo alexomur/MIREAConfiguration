@@ -1,6 +1,7 @@
 import os
 import __main__ as main
 
+
 def resolve_path(path: str) -> tuple[str, str] or None:
     """
     Resolves the given virtual path and checks if it exists in the real file system.
