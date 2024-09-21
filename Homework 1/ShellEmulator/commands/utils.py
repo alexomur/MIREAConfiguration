@@ -51,3 +51,7 @@ class GlobalManager:
     @staticmethod
     def add_command_history(command: str) -> None:
         GlobalManager.command_history.append(command)
+
+    @staticmethod
+    def clear_command_history() -> None:
+        GlobalManager.command_history = []
