@@ -1,3 +1,4 @@
+import os
 import unittest
 from datetime import datetime
 
@@ -11,7 +12,11 @@ class TestListCommand(unittest.TestCase):
 
     def setUp(self):
         GlobalManager.set_current_path("/")
-        GlobalManager.set_global_path(extract_zip("test_archive.zip"))
+
+        zip_path = os.path.join(os.path.dirname(__file__), "test_archive.zip")
+        global_zip_path = os.path.abspath(zip_path)
+        GlobalManager.set_global_path(extract_zip(global_zip_path))
+
         GlobalManager.set_exiting(False)
 
     def test_standard(self):
