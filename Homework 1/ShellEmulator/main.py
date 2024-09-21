@@ -28,6 +28,7 @@ def main() -> None:
             success, output = command.execute(args)
             if output:
                 print(output)
+            GlobalManager.add_command_history(f"{line} | {success}")
         else:
             print(f"Unknown command: {command_name}")
 

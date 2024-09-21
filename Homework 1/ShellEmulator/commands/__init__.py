@@ -13,11 +13,9 @@ def get_command(command_name: str) -> Command or None:
 
     for command_class in commands:
         if command_class.name == command_name:
-            GlobalManager.add_command_history(command_name)
             return command_class()
 
         if command_name in command_class.aliases:
-            GlobalManager.add_command_history(command_name)
             return command_class()
 
     return None

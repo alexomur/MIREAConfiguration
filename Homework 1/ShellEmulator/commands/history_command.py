@@ -36,6 +36,8 @@ class History(Command):
         if num is not None:
             history = history[-num:]
 
-        # Печатаем команды с их номерами
+        output: str = ""
+
         for idx, command in enumerate(history, start=1):
-            return f"{idx}  {command}"
+            output += f"{idx}  {command}\n"
+        return output
