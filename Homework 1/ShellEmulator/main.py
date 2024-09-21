@@ -5,14 +5,11 @@ But then I read 2-4 assignments and realized that Python is my choice.
 import shlex
 
 from zip_handler import extract_zip
-import commands
 from commands import get_command
 from commands import GlobalManager
 from configs import сonfig_utils
 
-# Global variables and setters accessible from all files
 config: dict = сonfig_utils.get_config()
-
 
 # Main loop
 def main() -> None:

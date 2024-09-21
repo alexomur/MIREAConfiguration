@@ -12,10 +12,11 @@ from .utils import resolve_path
 from typing import Tuple
 
 
+# ONLY FOR WINDOWS
 class Chown(Command):
     name: str = "chown"
     aliases: List[str] = []
-    description: str = "Changes the owner and/or group of a file or directory."
+    description: str = "Changes the owner and/or group of a file or directory. (ONLY FOR WINDOWS)"
 
     def execute(self, arguments: List[str]) -> Tuple[bool, str]:
         """
