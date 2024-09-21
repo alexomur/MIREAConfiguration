@@ -1,7 +1,7 @@
 from typing import Tuple
 
+from .utils import GlobalManager
 from .command_abc import Command
-import __main__ as main
 import os
 from .utils import resolve_path
 
@@ -18,12 +18,12 @@ class List(Command):
         """
         try:
             if not arguments:
-                virtual_directory, real_directory = resolve_path(main.current_path)
+                virtual_directory, real_directory = resolve_path(GlobalManager.current_path)
             else:
                 virtual_directory, real_directory = resolve_path(arguments[0])
 
             if real_directory is None:
-                return False, f"Error: Directory '{virtual_directory}' does not exist."
+                return False, f"Error: Directory '{arguments[0]}' does not exist."
 
             try:
                 files = os.listdir(real_directory)

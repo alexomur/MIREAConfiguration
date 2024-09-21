@@ -5,48 +5,22 @@ But then I read 2-4 assignments and realized that Python is my choice.
 import shlex
 
 from zip_handler import extract_zip
+import commands
 from commands import get_command
+from commands import GlobalManager
 from configs import сonfig_utils
 
 # Global variables and setters accessible from all files
-exiting: bool = False
-global_path: str
-current_path: str = "/"
 config: dict = сonfig_utils.get_config()
-command_history = []
-
-
-def get_command_history():
-    return command_history
-
-
-def add_command_history(command: str):
-    command_history.append(command)
-
-
-def set_exiting(new_value: bool) -> None:
-    global exiting
-    exiting = new_value
-
-
-def set_current_path(new_value: str) -> None:
-    global current_path
-    current_path = new_value
-
-
-def set_global_path(new_value: str) -> None:
-    global global_path
-    global_path = new_value
 
 
 # Main loop
 def main() -> None:
-    global exiting, global_path, current_path
 
-    global_path = extract_zip(config['path_to_zip'])
+    GlobalManager.set_global_path(extract_zip(config['path_to_zip']))
 
-    while not exiting:
-        line: str = input(f"{config['username']}:{current_path}# ")
+    while not GlobalManager.exiting:
+        line: str = input(f"{config['username']}:{GlobalManager.current_path}# ")
         if len(line) == 0:
             continue
 

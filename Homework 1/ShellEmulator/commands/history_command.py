@@ -1,5 +1,5 @@
+from .utils import GlobalManager
 from .command_abc import Command
-import __main__ as main
 from typing import List, Tuple
 
 
@@ -31,7 +31,7 @@ class History(Command):
 
     @staticmethod
     def get_history(num: int = None) -> str:
-        history = main.get_command_history()
+        history = GlobalManager.get_command_history()
 
         if num is not None:
             history = history[-num:]

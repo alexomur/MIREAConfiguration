@@ -1,6 +1,5 @@
 from .command_abc import Command
-import __main__ as main
-from .utils import resolve_path
+from .utils import resolve_path, GlobalManager
 from typing import Tuple
 
 
@@ -23,7 +22,7 @@ class Cd(Command):
             if real_directory is None:
                 return False, f"Error: Directory '{arguments[0]}' does not exist."
 
-            main.set_current_path(virtual_directory)
+            GlobalManager.set_current_path(virtual_directory)
             return True, ""
 
         except Exception as e:

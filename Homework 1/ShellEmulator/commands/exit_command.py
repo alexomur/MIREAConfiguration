@@ -1,5 +1,5 @@
+from .utils import GlobalManager
 from .command_abc import Command
-import __main__ as main
 from typing import List, Tuple
 
 
@@ -17,7 +17,7 @@ class Exit(Command):
             if arguments:
                 return False, "Error: 'exit' command does not accept any arguments.\nUsage:\n  exit"
 
-            main.set_exiting(True)
+            GlobalManager.set_exiting(True)
             return True, ""
 
         except Exception as e:
