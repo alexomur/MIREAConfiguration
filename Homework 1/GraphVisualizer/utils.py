@@ -1,33 +1,36 @@
-import json, os
+import json
 
 def read_json_file(filepath):
     with open(filepath, 'r') as file:
         return json.load(file)
 
-def get_dependencies(package_json):
-    return package_json.get("dependencies", {})
+def get_dependencies_from_lockfile(lockfile):
+    return lockfile.get("dependencies", {})
 
-def get_transitive_dependencies(package_path, dependencies, max_depth, current_depth=1):
+def get_transitive_dependencies_from_lockfile(dependencies, lockfile, max_depth, current_depth=1):
     graph = {}
 
     if current_depth > max_depth:
         return graph
 
-    for dep in dependencies:
-        dep_path = os.path.join(package_path, 'node_modules', dep, 'package.json')
-        if os.path.exists(dep_path):
-            dep_package_json = read_json_file(dep_path)
-            dep_deps = get_dependencies(dep_package_json)
-            graph[dep] = list(dep_deps.keys())
-            graph.update(get_transitive_dependencies(package_path, dep_deps, max_depth, current_depth + 1))
+    for dep_name, dep_info in dependencies.items():
+        dep_deps = dep_info.get('requires', {})
+        graph[dep_name] = list(dep_deps.keys()) if dep_deps else []
+        if current_depth < max_depth and dep_deps:  # Уходим глубже только если не достигли max_depth
+            deeper_deps = {dep: lockfile['dependencies'].get(dep, {}) for dep in dep_deps}
+            graph.update(get_transitive_dependencies_from_lockfile(deeper_deps, lockfile, max_depth, current_depth + 1))
+
     return graph
 
-def generate_plantuml(graph):
+def generate_plantuml(graph, root_package, max_depth):
     lines = ["@startuml"]
+    lines.append(f"[{root_package}]")
     for package, deps in graph.items():
-        lines.append(f"[{package}]")
+        if deps and max_depth > 0:  # Если есть зависимости и уровень глубже 0
+            lines.append(f"[{root_package}] --> [{package}]")
         for dep in deps:
-            lines.append(f"[{package}] --> [{dep}]")
+            if max_depth > 1:  # Учитываем только транзитивные зависимости при глубине > 1
+                lines.append(f"[{package}] --> [{dep}]")
     lines.append("@enduml")
     return "\n".join(lines)
 
@@ -35,4 +38,4 @@ def save_plantuml(plantuml_diagram, output_file):
     with open(output_file, 'w') as file:
         file.write(plantuml_diagram)
 
-__all__ = ["read_json_file", "get_dependencies", "get_transitive_dependencies", "generate_plantuml", "save_plantuml"]
+__all__ = ["read_json_file", "get_dependencies_from_lockfile", "get_transitive_dependencies_from_lockfile", "generate_plantuml", "save_plantuml"]
