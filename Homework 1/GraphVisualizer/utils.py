@@ -16,20 +16,19 @@ def get_transitive_dependencies_from_lockfile(dependencies, lockfile, max_depth,
     for dep_name, dep_info in dependencies.items():
         dep_deps = dep_info.get('requires', {})
         graph[dep_name] = list(dep_deps.keys()) if dep_deps else []
-        if current_depth < max_depth and dep_deps:  # Уходим глубже только если не достигли max_depth
+        if current_depth < max_depth and dep_deps:
             deeper_deps = {dep: lockfile['dependencies'].get(dep, {}) for dep in dep_deps}
             graph.update(get_transitive_dependencies_from_lockfile(deeper_deps, lockfile, max_depth, current_depth + 1))
 
     return graph
 
 def generate_plantuml(graph, root_package, max_depth):
-    lines = ["@startuml"]
-    lines.append(f"[{root_package}]")
+    lines = ["@startuml", f"[{root_package}]"]
     for package, deps in graph.items():
-        if deps and max_depth > 0:  # Если есть зависимости и уровень глубже 0
+        if deps and max_depth > 0:
             lines.append(f"[{root_package}] --> [{package}]")
         for dep in deps:
-            if max_depth > 1:  # Учитываем только транзитивные зависимости при глубине > 1
+            if max_depth > 1:
                 lines.append(f"[{package}] --> [{dep}]")
     lines.append("@enduml")
     return "\n".join(lines)

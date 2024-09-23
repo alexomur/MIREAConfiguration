@@ -1,4 +1,5 @@
 import argparse
+import os
 import subprocess
 from os import PathLike
 from utils import *
@@ -18,7 +19,9 @@ def main(lockfile_path: PathLike, plantuml_path: PathLike, max_depth: int):
     save_plantuml(plantuml_diagram, plantuml_file)
 
     try:
-        subprocess.run([plantuml_path, plantuml_file])
+        if not plantuml_path or not os.path.exists(plantuml_path):
+            raise FileNotFoundError(f"Файл {plantuml_path} не найден или путь не указан.")
+        subprocess.run(["python", plantuml_path, plantuml_file])
     except Exception as e:
         print(f"Невозможно запустить программу для визуализации графа. Подробнее:\n{e}\n\nЗависимости в формате PlantUML:\n{plantuml_diagram}")
 
@@ -36,7 +39,7 @@ if __name__ == "__main__":
         "--plantuml_path",
         help="Путь к программе для визуализации",
         required=False,
-        default="visualizer.py")
+        default="None") # replace with visualizer.py on release
     parser.add_argument(
         "-d",
         "--max_depth",
