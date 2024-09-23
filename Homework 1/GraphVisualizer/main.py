@@ -39,7 +39,7 @@ if __name__ == "__main__":
         "--plantuml_path",
         help="Путь к программе для визуализации",
         required=False,
-        default="None") # replace with visualizer.py on release
+        default="visualizer.py") # replace with visualizer.py on release
     parser.add_argument(
         "-d",
         "--max_depth",
