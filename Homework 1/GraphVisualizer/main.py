@@ -21,7 +21,7 @@ def main(lockfile_path: PathLike, plantuml_path: PathLike, max_depth: int):
     try:
         if not plantuml_path or not os.path.exists(plantuml_path):
             raise FileNotFoundError(f"Файл {plantuml_path} не найден или путь не указан.")
-        subprocess.run(["python", plantuml_path, plantuml_file])
+        subprocess.run(["python", plantuml_path, plantuml_file, str(max_depth)])
     except Exception as e:
         print(f"Невозможно запустить программу для визуализации графа. Подробнее:\n{e}\n\nЗависимости в формате PlantUML:\n{plantuml_diagram}")
 
