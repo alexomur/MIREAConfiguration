@@ -2,7 +2,7 @@ import argparse
 import os
 import subprocess
 from os import PathLike
-from utils import *
+from graph_utils import *
 
 def main(lockfile_path: PathLike, plantuml_path: PathLike, max_depth: int):
     lockfile_json = read_json_file(lockfile_path)
