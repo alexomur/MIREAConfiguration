@@ -1,11 +1,14 @@
 import json
 
+
 def read_json_file(filepath):
     with open(filepath, 'r') as file:
         return json.load(file)
 
+
 def get_dependencies_from_lockfile(lockfile):
     return lockfile.get("dependencies", {})
+
 
 def get_transitive_dependencies_from_lockfile(dependencies, lockfile, max_depth, current_depth=1):
     graph = {}
@@ -22,6 +25,7 @@ def get_transitive_dependencies_from_lockfile(dependencies, lockfile, max_depth,
 
     return graph
 
+
 def generate_plantuml(graph, root_package, max_depth):
     lines = ["@startuml", f"[{root_package}]"]
     for package, deps in graph.items():
@@ -33,8 +37,11 @@ def generate_plantuml(graph, root_package, max_depth):
     lines.append("@enduml")
     return "\n".join(lines)
 
+
 def save_plantuml(plantuml_diagram, output_file):
     with open(output_file, 'w') as file:
         file.write(plantuml_diagram)
 
-__all__ = ["read_json_file", "get_dependencies_from_lockfile", "get_transitive_dependencies_from_lockfile", "generate_plantuml", "save_plantuml"]
+
+__all__ = ["read_json_file", "get_dependencies_from_lockfile", "get_transitive_dependencies_from_lockfile",
+           "generate_plantuml", "save_plantuml"]

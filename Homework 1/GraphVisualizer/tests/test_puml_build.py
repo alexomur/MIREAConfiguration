@@ -7,6 +7,7 @@ import tempfile
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import main
 
+
 class TestPlantUMLGeneration(unittest.TestCase):
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
@@ -44,6 +45,7 @@ class TestPlantUMLGeneration(unittest.TestCase):
         self.assertIn('[example-project]', content)
         self.assertIn('[example-project] --> [dep1]', content)
         self.assertNotIn('[dep1] --> [dep2]', content)
+
 
 if __name__ == '__main__':
     unittest.main()

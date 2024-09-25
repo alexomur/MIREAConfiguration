@@ -4,6 +4,7 @@ import subprocess
 from os import PathLike
 from graph_utils import *
 
+
 def main(lockfile_path: PathLike, plantuml_path: PathLike, max_depth: int):
     lockfile_json = read_json_file(lockfile_path)
 
@@ -23,7 +24,9 @@ def main(lockfile_path: PathLike, plantuml_path: PathLike, max_depth: int):
             raise FileNotFoundError(f"Файл {plantuml_path} не найден или путь не указан.")
         subprocess.run(["python", plantuml_path, plantuml_file, str(max_depth)])
     except Exception as e:
-        print(f"Невозможно запустить программу для визуализации графа. Подробнее:\n{e}\n\nЗависимости в формате PlantUML:\n{plantuml_diagram}")
+        print(
+            f"Невозможно запустить программу для визуализации графа. Подробнее:\n{e}\n\nЗависимости в формате PlantUML:\n{plantuml_diagram}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Инструмент для визуализации графа зависимостей JavaScript (npm).")
@@ -39,7 +42,7 @@ if __name__ == "__main__":
         "--plantuml_path",
         help="Путь к программе для визуализации",
         required=False,
-        default="visualizer.py") # replace with visualizer.py on release
+        default="visualizer.py")  # replace with visualizer.py on release
     parser.add_argument(
         "-d",
         "--max_depth",

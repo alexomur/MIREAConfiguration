@@ -9,6 +9,7 @@ from contextlib import redirect_stdout
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from visualizer import main
 
+
 class TestVisualizer(unittest.TestCase):
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
@@ -61,6 +62,7 @@ class TestVisualizer(unittest.TestCase):
     └── dep1
 """
         self.assertEqual(output, expected_output)
+
 
 if __name__ == '__main__':
     unittest.main()
