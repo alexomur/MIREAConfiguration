@@ -11,26 +11,43 @@ from configs import сonfig_utils
 
 config: dict = сonfig_utils.get_config()
 
-def main() -> None:
 
-    GlobalManager.set_global_path(extract_zip(config['path_to_zip']))
+def set_up(files, username: str, ):
+    pass
+
+
+def main() -> None:
+    extract_zip(config['path_to_zip'])
+
+    GlobalManager.set_current_path("/")
 
     while not GlobalManager.exiting:
         try:
             line: str = input(f"{config['username']}:{GlobalManager.current_path}# ")
-            if len(line) == 0:
+            if len(line.strip()) == 0:
                 continue
 
-            command_name: str = line.split()[0]
+            tokens = shlex.split(line)
+            if not tokens:
+                continue
 
-            args = shlex.split(line)[1:]
-            if command := get_command(command_name):
+            command_name: str = tokens[0]
+            args = tokens[1:]
+
+            command = get_command(command_name)
+            if command:
                 success, output = command.execute(args)
                 if output:
                     print(output)
-                GlobalManager.add_command_history(f"{line} | {success}")
+                GlobalManager.add_command_history(f"{line} | {'Success' if success else 'Failure'}")
             else:
                 print(f"Unknown command: {command_name}")
+        except KeyboardInterrupt:
+            print("\nExiting shell.")
+            GlobalManager.set_exiting(True)
+        except EOFError:
+            print("\nExiting shell.")
+            GlobalManager.set_exiting(True)
         except Exception as e:
             print(f"General Error: {e}")
 

@@ -1,50 +1,54 @@
-from commands import Command
-
 import os, re
 
 
-def resolve_path(path: str) -> tuple[str, str] or None:
+def resolve_path(path: str) -> str | None:
     """
-    Resolves the given virtual path and checks if it exists in the real file system.
+    Checks if it exists in the archive file system
 
-    :param path: The virtual path to a file or directory, which can be either relative or absolute.
-    :return: A tuple (virtual_path, real_path) if the path exists, otherwise (None, None).
+    :param path: Absolute or relative path
+    :return: Absolute resolved path if it exists, None otherwise
     """
-    # Разделяем путь на сегменты
-    segments = path.split('/')
+    if path.startswith('/'):
+        combined_path = path
+    else:
+        if GlobalManager.current_path == '/':
+            combined_path = '/' + path
+        else:
+            combined_path = GlobalManager.current_path.rstrip('/') + '/' + path
+
+    segments = combined_path.split('/')
     processed_segments = []
 
+    # checking path for '..' and other dots constructs
+    # Измени этот цикл, чтобы проверять различные нестандартные условия, например '..'
     for segment in segments:
-        # Проверяем, состоит ли сегмент только из точек
-        if re.fullmatch(r'\.+', segment):
-            dot_count = len(segment)
-            # Каждые две точки интерпретируем как '..'
-            up_levels = dot_count // 2
-            processed_segments.extend(['..'] * up_levels)
-            # Если количество точек нечетное, добавляем один '.' в конце
-            if dot_count % 2 != 0:
-                processed_segments.append('.')
+        if segment == '..':
+            if processed_segments:
+                processed_segments.pop()
+        elif segment == '.' or segment == '':
+            continue
         else:
-            # Оставляем сегмент без изменений
             processed_segments.append(segment)
 
-    # Собираем обработанные сегменты обратно в путь
-    normalized_virtual_path = "/".join(processed_segments)
-    virtual_path = os.path.normpath(
-        os.path.join(GlobalManager.current_path, normalized_virtual_path) if not os.path.isabs(
-            normalized_virtual_path) else normalized_virtual_path).replace(os.sep, "/")
+    processed_segments = list(filter(None, processed_segments))
+    if not processed_segments:
+        processed_path = '/'
+    else:
+        processed_path = '/'.join(processed_segments)
 
-    real_path = os.path.join(GlobalManager.global_path, virtual_path.lstrip("/").replace("/", os.sep))
+    # Добавь сюда свой код, отвечающий за возврат пути
+    # Проверка на существование директории с добавлением '/'
+    if processed_path + '/' in GlobalManager.files:
+        return processed_path + '/'
+    elif processed_path in GlobalManager.files:
+        return processed_path
+    return None
 
-    if os.path.exists(real_path):  # Проверяем существование файла или директории
-        return virtual_path, real_path
-
-    return None, None
 
 
 # static class
 class GlobalManager:
-    global_path: str
+    files = {'/': ''}
     current_path: str = "/"
     exiting: bool = False
     command_history: list[str] = []
@@ -55,10 +59,6 @@ class GlobalManager:
     @staticmethod
     def set_current_path(path: str) -> None:
         GlobalManager.current_path = path
-
-    @staticmethod
-    def set_global_path(path: str) -> None:
-        GlobalManager.global_path = path
 
     @staticmethod
     def set_exiting(exiting: bool) -> None:
@@ -75,3 +75,17 @@ class GlobalManager:
     @staticmethod
     def clear_command_history() -> None:
         GlobalManager.command_history = []
+
+    @staticmethod
+    def add_file(path: str, file) -> None:
+        GlobalManager.files[path] = file
+
+    @staticmethod
+    def get_file(path: str) -> str | None:
+        if path in GlobalManager.files.keys():
+            return GlobalManager.files[path]
+        return None
+
+
+if __name__ == "__main__":
+    resolve_path("/private/test/")
