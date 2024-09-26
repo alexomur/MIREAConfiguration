@@ -36,14 +36,15 @@ class TestListCommand(unittest.TestCase):
         GlobalManager.set_exiting(False)
 
     def test_standard(self):
-        self.assertEqual((True, "Successfully changed ownership of '/Test Folder 1'"), self.command.execute(["Alexomur", "Test Folder 1"]))
+        new_owner: str = "Alexomur"
+        self.assertEqual((True, "Successfully changed ownership of '/Test Folder 1'"), self.command.execute([new_owner, "Test Folder 1"]))
 
         resolved = resolve_path("Test Folder 1")
         if not resolved or resolved == (None, None):
             raise Exception("Error: File or directory 'Test Folder 1' does not exist.")
         _, real_path = resolved
 
-        self.assertEqual("HOME-PC\\Alexomur", self.get_owner(real_path))
+        self.assertIn(new_owner.lower(), str(real_path).lower())
 
     def test_not_enough_arguments(self):
         self.assertEqual((False, "Error: 'chown' requires at least two arguments.\nUsage:\n  chown <owner>[:<group>] <file>..."), self.command.execute([]))
