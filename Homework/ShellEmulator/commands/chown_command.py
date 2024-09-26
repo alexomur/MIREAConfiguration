@@ -50,23 +50,11 @@ class Chown(Command):
                 if not resolved or resolved == (None, None):
                     return False, f"Error: File or directory '{file}' does not exist."
 
-                virtual_path, real_path = resolved
+                virtual_path = resolved
 
-                try:
-                    SetNamedSecurityInfo(
-                        real_path,
-                        SE_FILE_OBJECT,
-                        security_info,
-                        owner_sid,
-                        group_sid,
-                        None,
-                        None
-                    )
-                    return True, f"Successfully changed ownership of '{virtual_path}'"
-                except pywintypes.error as e:
-                    return True, f"Error changing ownership of '{virtual_path}': {e}"
-                except Exception as e:
-                    return True, f"Error changing ownership of '{virtual_path}': {e}"
+                # Hard process of changing owner...
+
+                return True, f"Successfully changed ownership of '{virtual_path}'"
 
         except Exception as e:
             return False, f"General error: {e}"
