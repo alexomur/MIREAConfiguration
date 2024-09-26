@@ -1,6 +1,6 @@
-import os
-
 from commands import Command
+
+import os, re
 
 
 def resolve_path(path: str) -> tuple[str, str] or None:
@@ -10,10 +10,29 @@ def resolve_path(path: str) -> tuple[str, str] or None:
     :param path: The virtual path to a file or directory, which can be either relative or absolute.
     :return: A tuple (virtual_path, real_path) if the path exists, otherwise (None, None).
     """
-    if not os.path.isabs(path):
-        virtual_path = os.path.normpath(os.path.join(GlobalManager.current_path, path)).replace(os.sep, "/")
-    else:
-        virtual_path = os.path.normpath(path).replace(os.sep, "/")
+    # Разделяем путь на сегменты
+    segments = path.split('/')
+    processed_segments = []
+
+    for segment in segments:
+        # Проверяем, состоит ли сегмент только из точек
+        if re.fullmatch(r'\.+', segment):
+            dot_count = len(segment)
+            # Каждые две точки интерпретируем как '..'
+            up_levels = dot_count // 2
+            processed_segments.extend(['..'] * up_levels)
+            # Если количество точек нечетное, добавляем один '.' в конце
+            if dot_count % 2 != 0:
+                processed_segments.append('.')
+        else:
+            # Оставляем сегмент без изменений
+            processed_segments.append(segment)
+
+    # Собираем обработанные сегменты обратно в путь
+    normalized_virtual_path = "/".join(processed_segments)
+    virtual_path = os.path.normpath(
+        os.path.join(GlobalManager.current_path, normalized_virtual_path) if not os.path.isabs(
+            normalized_virtual_path) else normalized_virtual_path).replace(os.sep, "/")
 
     real_path = os.path.join(GlobalManager.global_path, virtual_path.lstrip("/").replace("/", os.sep))
 
@@ -21,6 +40,7 @@ def resolve_path(path: str) -> tuple[str, str] or None:
         return virtual_path, real_path
 
     return None, None
+
 
 # static class
 class GlobalManager:
