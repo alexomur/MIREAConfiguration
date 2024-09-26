@@ -24,7 +24,7 @@
     ```commandline
     venv\Scripts\activate
     ```
-3. Сменить директорию на "Homework 1/ShellEmulator"
+3. Сменить директорию на директорию, в которой лежит этот README файл
 4. Активировать файл main.py:
     ```commandline
     python main.py
