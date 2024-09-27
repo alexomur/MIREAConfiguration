@@ -2,6 +2,7 @@ from typing import Tuple
 
 from .utils import GlobalManager
 from .command_abc import Command
+import os
 from .utils import resolve_path
 
 
@@ -13,49 +14,29 @@ class List(Command):
     def execute(self, arguments: list[str]) -> Tuple[bool, str]:
         """
         :param arguments: List of command-line arguments.
-        :return: Tuple[bool, str] - (success status, message to print)
+        :return: True if executed successfully, False otherwise. Out str - something to print
         """
         try:
-            # Определяем виртуальную директорию
             if not arguments:
-                virtual_directory = resolve_path(GlobalManager.current_path)
+                virtual_directory, real_directory = resolve_path(GlobalManager.current_path)
             else:
-                virtual_directory = resolve_path(arguments[0])
+                virtual_directory, real_directory = resolve_path(arguments[0])
 
-            if virtual_directory is None:
-                dir_name = arguments[0] if arguments else GlobalManager.current_path
-                return False, f"Error: Directory '{dir_name}' does not exist."
+            if real_directory is None:
+                return False, f"Error: Directory '{arguments[0]}' does not exist."
 
-            if not virtual_directory.endswith('/'):
-                virtual_directory += '/'
+            try:
+                files = os.listdir(real_directory)
+            except PermissionError:
+                return False, f"Error: Permission denied for directory '{virtual_directory}'."
+            except Exception as e:
+                return False, f"Error accessing directory '{virtual_directory}': {e}"
 
-            if virtual_directory == "/":
-                prefix = ""
-            else:
-                prefix = virtual_directory
+            output = ""
+            for file in files:
+                output += f"{file}\n"
 
-            items = set()
-            for path in GlobalManager.files.keys():
-                if path == '/':
-                    continue
-
-                if not path.startswith(prefix):
-                    continue
-
-                remainder = path[len(prefix):]
-
-                if not remainder:
-                    continue
-
-                parts = remainder.split('/', 1)
-
-                if len(parts) == 2:
-                    items.add(parts[0] + '/')
-                else:
-                    items.add(parts[0])
-
-            output = '\n'.join(sorted(items))
-            return True, output
+            return True, output[:-1]
 
         except Exception as e:
             return False, f"General error: {e}"

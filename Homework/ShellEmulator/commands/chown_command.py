@@ -13,7 +13,6 @@ from typing import Tuple
 
 
 # ONLY FOR WINDOWS
-# this command has no more sense because of d demand of unzipping archive into the memory instead of temp dir
 class Chown(Command):
     name: str = "chown"
     aliases: List[str] = []
@@ -51,9 +50,23 @@ class Chown(Command):
                 if not resolved or resolved == (None, None):
                     return False, f"Error: File or directory '{file}' does not exist."
 
-                # Hard process of changing owner...
+                virtual_path, real_path = resolved
 
-                return True, f"Successfully changed ownership of '{resolved}'"
+                try:
+                    SetNamedSecurityInfo(
+                        real_path,
+                        SE_FILE_OBJECT,
+                        security_info,
+                        owner_sid,
+                        group_sid,
+                        None,
+                        None
+                    )
+                    return True, f"Successfully changed ownership of '{virtual_path}'"
+                except pywintypes.error as e:
+                    return True, f"Error changing ownership of '{virtual_path}': {e}"
+                except Exception as e:
+                    return True, f"Error changing ownership of '{virtual_path}': {e}"
 
         except Exception as e:
             return False, f"General error: {e}"
