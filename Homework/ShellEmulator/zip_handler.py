@@ -1,20 +1,22 @@
-import zipfile, os, tempfile
+import zipfile
+import os
+from commands import utils
 
 
-# Peace of terrible code from cyberforum translated from python 2
-# But it works and I don't want to touch it ever again
-# UPD: Ive been forced to touch it because it stopped working with Win11 :sad:
 def extract_zip(path):
     with zipfile.ZipFile(path, "r") as zip_f:
-        temp_dir = tempfile.mkdtemp()
-        for name in zip_f.namelist():
-            fullpath = os.path.join(temp_dir, name)
-            if name.endswith('/'):
-                os.makedirs(fullpath, exist_ok=True)
+        for file_info in zip_f.infolist():
+            name = file_info.filename
+            if file_info.is_dir():
+                # Добавляем директорию
+                utils.GlobalManager.add_file(name, "")
             else:
-                os.makedirs(os.path.dirname(fullpath), exist_ok=True)
-                with zip_f.open(name, "r") as f:
-                    content = f.read()
-                    with open(fullpath, "wb") as output_file:
-                        output_file.write(content)
-    return temp_dir
+                # Добавляем файл
+                utils.GlobalManager.add_file(name, zip_f.read(name))
+
+                # Добавляем все родительские директории
+                parent = os.path.dirname(name) + '/'
+                while parent != '/':
+                    if parent not in utils.GlobalManager.files:
+                        utils.GlobalManager.add_file(parent, "")
+                    parent = os.path.dirname(parent[:-1]) + '/'  # Удаляем последний '/' перед dirname

@@ -1,50 +1,73 @@
-from commands import Command
-
 import os, re
 
 
-def resolve_path(path: str) -> tuple[str, str] or None:
+def resolve_path(path: str) -> str | None:
     """
-    Resolves the given virtual path and checks if it exists in the real file system.
+    Checks if it exists in the archive file system
 
-    :param path: The virtual path to a file or directory, which can be either relative or absolute.
-    :return: A tuple (virtual_path, real_path) if the path exists, otherwise (None, None).
+    :param path: Path to file in the archive file system
+    :return: Resolved path if it exists, None otherwise
     """
-    # Разделяем путь на сегменты
     segments = path.split('/')
     processed_segments = []
 
+    # checking path for '..' and other dots constructs
     for segment in segments:
-        # Проверяем, состоит ли сегмент только из точек
         if re.fullmatch(r'\.+', segment):
             dot_count = len(segment)
-            # Каждые две точки интерпретируем как '..'
             up_levels = dot_count // 2
             processed_segments.extend(['..'] * up_levels)
-            # Если количество точек нечетное, добавляем один '.' в конце
             if dot_count % 2 != 0:
                 processed_segments.append('.')
         else:
-            # Оставляем сегмент без изменений
             processed_segments.append(segment)
 
-    # Собираем обработанные сегменты обратно в путь
     normalized_virtual_path = "/".join(processed_segments)
-    virtual_path = os.path.normpath(
-        os.path.join(GlobalManager.current_path, normalized_virtual_path) if not os.path.isabs(
-            normalized_virtual_path) else normalized_virtual_path).replace(os.sep, "/")
+    if not os.path.isabs(normalized_virtual_path):
+        combined_path = os.path.join(GlobalManager.current_path, normalized_virtual_path)
+    else:
+        combined_path = normalized_virtual_path
 
-    real_path = os.path.join(GlobalManager.global_path, virtual_path.lstrip("/").replace("/", os.sep))
+    virtual_path = os.path.normpath(combined_path).replace(os.sep, "/")
 
-    if os.path.exists(real_path):  # Проверяем существование файла или директории
-        return virtual_path, real_path
+    if virtual_path == "/":
+        return virtual_path
 
-    return None, None
+    # Remove leading '/' to match GlobalManager.files keys
+    virtual_path = virtual_path.lstrip('/')
+
+    # If path is directory, ensure it ends with '/'
+    if not virtual_path.endswith('/'):
+        potential_dir = virtual_path + '/'
+        # Check if 'virtual_path/' exists or any file starts with 'virtual_path/'
+        if GlobalManager.get_file(potential_dir) or any(p.startswith(potential_dir) for p in GlobalManager.files):
+            virtual_path = potential_dir
+
+    # Now check if virtual_path exists as directory
+    if GlobalManager.get_file(virtual_path):
+        return virtual_path
+
+    # Additionally, consider directory existing if any file starts with virtual_path + '/'
+    if any(p.startswith(virtual_path + '/') for p in GlobalManager.files):
+        return virtual_path + '/'
+
+    return None
+
+
+class File:
+    def __init__(self, is_dir: bool, name: str, path: str, files: list) -> None:
+        self.is_dir = is_dir
+        self.name = name
+        self.path = path
+        self.files = files
+
+    def __str__(self):
+        return self.name
 
 
 # static class
 class GlobalManager:
-    global_path: str
+    files = {}
     current_path: str = "/"
     exiting: bool = False
     command_history: list[str] = []
@@ -55,10 +78,6 @@ class GlobalManager:
     @staticmethod
     def set_current_path(path: str) -> None:
         GlobalManager.current_path = path
-
-    @staticmethod
-    def set_global_path(path: str) -> None:
-        GlobalManager.global_path = path
 
     @staticmethod
     def set_exiting(exiting: bool) -> None:
@@ -75,3 +94,13 @@ class GlobalManager:
     @staticmethod
     def clear_command_history() -> None:
         GlobalManager.command_history = []
+
+    @staticmethod
+    def add_file(path: str, file) -> None:
+        GlobalManager.files[path] = file
+
+    @staticmethod
+    def get_file(path: str) -> str | None:
+        if path in GlobalManager.files.keys():
+            return GlobalManager.files[path]
+        return None
