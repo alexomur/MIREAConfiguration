@@ -20,7 +20,6 @@ def resolve_path(path: str) -> str | None:
     processed_segments = []
 
     # checking path for '..' and other dots constructs
-    # Измени этот цикл, чтобы проверять различные нестандартные условия, например '..'
     for segment in segments:
         if segment == '..':
             if processed_segments:
@@ -36,11 +35,10 @@ def resolve_path(path: str) -> str | None:
     else:
         processed_path = '/'.join(processed_segments)
 
-    # Добавь сюда свой код, отвечающий за возврат пути
-    # Проверка на существование директории с добавлением '/'
+    # checking path on existing
     if processed_path + '/' in GlobalManager.files:
         return processed_path + '/'
-    elif processed_path in GlobalManager.files:
+    elif processed_path.endswith('/') and processed_path in GlobalManager.files:
         return processed_path
     return None
 
