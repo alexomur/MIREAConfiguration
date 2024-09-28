@@ -1,6 +1,3 @@
-import os, re
-
-
 def resolve_path(path: str) -> str | None:
     """
     Checks if it exists in the archive file system
@@ -29,6 +26,7 @@ def resolve_path(path: str) -> str | None:
         else:
             processed_segments.append(segment)
 
+    # coming back to /.../.../ form
     processed_segments = list(filter(None, processed_segments))
     if not processed_segments:
         processed_path = '/'
@@ -83,7 +81,3 @@ class GlobalManager:
         if path in GlobalManager.files.keys():
             return GlobalManager.files[path]
         return None
-
-
-if __name__ == "__main__":
-    resolve_path("/private/test/")
