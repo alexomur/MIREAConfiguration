@@ -11,7 +11,6 @@ from configs import сonfig_utils
 
 config: dict
 
-
 def set_up(cfg: dict = None, files: dict = None, current_path: str = '/'):
     global config
 

@@ -2,27 +2,20 @@ def resolve_path(path: str) -> str | None:
     """
     Checks if it exists in the archive file system
 
-    :param path: Absolute or relative path
-    :return: Absolute resolved path if it exists, None otherwise
+    :param path: Path to file in the archive file system
+    :return: Resolved path if it exists, None otherwise
     """
-    if path.startswith('/'):
-        combined_path = path
-    else:
-        if GlobalManager.current_path == '/':
-            combined_path = '/' + path
-        else:
-            combined_path = GlobalManager.current_path.rstrip('/') + '/' + path
-
-    segments = combined_path.split('/')
+    segments = path.split('/')
     processed_segments = []
 
     # checking path for '..' and other dots constructs
     for segment in segments:
-        if segment == '..':
-            if processed_segments:
-                processed_segments.pop()
-        elif segment == '.' or segment == '':
-            continue
+        if re.fullmatch(r'\.+', segment):
+            dot_count = len(segment)
+            up_levels = dot_count // 2
+            processed_segments.extend(['..'] * up_levels)
+            if dot_count % 2 != 0:
+                processed_segments.append('.')
         else:
             processed_segments.append(segment)
 
@@ -40,11 +33,9 @@ def resolve_path(path: str) -> str | None:
         return processed_path
     return None
 
-
-
 # static class
 class GlobalManager:
-    files = {'/': ''}
+    files = {}
     current_path: str = "/"
     exiting: bool = False
     command_history: list[str] = []

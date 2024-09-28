@@ -26,6 +26,7 @@ class List(Command):
                 dir_name = arguments[0] if arguments else GlobalManager.current_path
                 return False, f"Error: Directory '{dir_name}' does not exist."
 
+            # Убедимся, что виртуальная директория заканчивается '/'
             if not virtual_directory.endswith('/'):
                 virtual_directory += '/'
 
@@ -36,24 +37,27 @@ class List(Command):
 
             items = set()
             for path in GlobalManager.files.keys():
-                if path == '/':
-                    continue
-
                 if not path.startswith(prefix):
                     continue
 
+                # Удаляем префикс виртуальной директории из пути
                 remainder = path[len(prefix):]
 
+                # Пропускаем, если это сама директория
                 if not remainder:
                     continue
 
+                # Разделяем оставшуюся часть пути по первому '/'
                 parts = remainder.split('/', 1)
 
                 if len(parts) == 2:
+                    # Это поддиректория
                     items.add(parts[0] + '/')
                 else:
+                    # Это файл
                     items.add(parts[0])
 
+            # Формируем отсортированный вывод
             output = '\n'.join(sorted(items))
             return True, output
 
