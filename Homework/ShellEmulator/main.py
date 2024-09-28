@@ -9,17 +9,28 @@ from commands import get_command
 from commands import GlobalManager
 from configs import сonfig_utils
 
-config: dict = сonfig_utils.get_config()
+config: dict
 
 
-def set_up(files, username: str, ):
-    pass
+def set_up(cfg: dict = None, files: dict = None, current_path: str = '/'):
+    global config
+
+    if cfg is not None:
+        config = cfg
+    else:
+        config = сonfig_utils.get_config()
+
+    if files:
+        for file in files:
+            GlobalManager.add_file(file, files[file])
+    else:
+        extract_zip(config['path_to_zip'])
+
+    GlobalManager.set_current_path(current_path)
 
 
 def main() -> None:
-    extract_zip(config['path_to_zip'])
-
-    GlobalManager.set_current_path("/")
+    set_up()
 
     while not GlobalManager.exiting:
         try:
