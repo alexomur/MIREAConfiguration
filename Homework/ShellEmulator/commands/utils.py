@@ -1,3 +1,6 @@
+import re
+
+
 def resolve_path(path: str) -> str | None:
     """
     Checks if it exists in the archive file system
@@ -31,11 +34,15 @@ def resolve_path(path: str) -> str | None:
         return processed_path + '/'
     elif processed_path.endswith('/') and processed_path in GlobalManager.files:
         return processed_path
+    elif '/' + processed_path in GlobalManager.files:
+        return processed_path
+    elif processed_path in GlobalManager.files:
+        return processed_path
     return None
 
 # static class
 class GlobalManager:
-    files = {}
+    files = {'/':''}
     current_path: str = "/"
     exiting: bool = False
     command_history: list[str] = []

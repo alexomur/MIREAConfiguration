@@ -22,7 +22,7 @@ class Cd(Command):
 
             virtual_directory = resolve_path(target_path)
 
-            if virtual_directory is None:
+            if virtual_directory is None or not virtual_directory.endswith('/'):
                 return False, f"Error: Directory '{target_path}' does not exist."
 
             if not virtual_directory.endswith('/'):

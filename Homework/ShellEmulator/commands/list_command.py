@@ -21,12 +21,9 @@ class List(Command):
             else:
                 virtual_directory = resolve_path(arguments[0])
 
-            if virtual_directory is None:
+            if virtual_directory is None or not virtual_directory.endswith('/'):
                 dir_name = arguments[0] if arguments else GlobalManager.current_path
                 return False, f"Error: Directory '{dir_name}' does not exist."
-
-            if not virtual_directory.endswith('/'):
-                virtual_directory += '/'
 
             if virtual_directory == "/":
                 prefix = ""
@@ -40,7 +37,7 @@ class List(Command):
 
                 remainder = path[len(prefix):]
 
-                if not remainder:
+                if not remainder or remainder == '/':
                     continue
 
                 parts = remainder.split('/', 1)

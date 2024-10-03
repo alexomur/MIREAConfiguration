@@ -26,8 +26,6 @@ class Chown(Command):
                 if not resolved or resolved == (None, None):
                     return False, f"Error: File or directory '{file}' does not exist."
 
-                virtual_path = resolved
-
                 # Hard process of changing owner...
 
                 return True, f"Successfully changed ownership of '/{resolved}'"
