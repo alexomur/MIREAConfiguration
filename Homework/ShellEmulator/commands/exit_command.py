@@ -21,11 +21,7 @@ class Exit(Command):
                 return False, "Error: 'exit' command does not accept any arguments.\nUsage:\n  exit"
 
             GlobalManager.set_exiting(True)
-            if os.path.exists(GlobalManager.global_path) and os.path.isdir(GlobalManager.global_path):
-                shutil.rmtree(GlobalManager.global_path)
-                return True, ""
-            else:
-                return False, f"Error: Folder '{GlobalManager.global_path}' does not exist."
+            return True, ""
 
         except Exception as e:
             return False, f"General error: {e}"

@@ -14,7 +14,7 @@ class TestListCommand(unittest.TestCase):
 
         zip_path = os.path.join(os.path.dirname(__file__), "test_archive.zip")
         global_zip_path = os.path.abspath(zip_path)
-        GlobalManager.set_global_path(extract_zip(global_zip_path))
+        extract_zip(global_zip_path)
 
         GlobalManager.set_exiting(False)
 
