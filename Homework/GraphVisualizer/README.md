@@ -24,6 +24,8 @@
     ```commandline
     python main.py
     ```
+Пример работы программы:
+![img.png](Assets/main.png)
    
 Доступные параметры:
    * `--lockfile_path` `-l` - Путь к файлу package-lock.json (по-умолчанию "package-lock.json")
@@ -42,3 +44,12 @@
     ```commandline
     python -m unittest discover -s tests -p "test_*.py"
     ```
+Пример работы тестов:
+![img.png](Assets/tests.png)
+
+## Рекомендации по просмотру коммитов
+1. В указанном репозитории открыть Pull requests
+2. Просмотреть список закрытых PR
+3. В PR `GraphVisualizer init` можно просмотреть историю коммитов
+
+P.S. Для проверки работы программы рекомендуется клонировать репозиторий из ветки `Homework`, так как уже после закрытия указанного PR были добавлены некоторые модификации
