@@ -29,6 +29,8 @@
     ```commandline
     python main.py
     ```
+Пример работы программы:
+![img.png](Assets/main.png)
 
 ## Запуск тестов
 1. В консоли сменить директорию на директорию, в которой лежит этот README файл
@@ -36,3 +38,5 @@
     ```commandline
     python -m unittest discover -s tests -p "test_*.py"
     ```
+Пример работы тестов:
+![img.png](Assets/tests.png)
