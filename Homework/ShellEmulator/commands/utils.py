@@ -32,12 +32,12 @@ def resolve_path(path: str) -> str | None:
     # checking path on existing
     if processed_path + '/' in GlobalManager.files:
         return processed_path + '/'
-    elif processed_path.endswith('/') and processed_path in GlobalManager.files:
-        return processed_path
     elif '/' + processed_path in GlobalManager.files:
         return processed_path
     elif processed_path in GlobalManager.files:
         return processed_path
+    elif GlobalManager.current_path + processed_path in GlobalManager.files:
+        return GlobalManager.current_path + processed_path
     return None
 
 # static class

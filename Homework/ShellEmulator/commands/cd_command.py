@@ -29,7 +29,7 @@ class Cd(Command):
                 virtual_directory += '/'
 
             GlobalManager.set_current_path(virtual_directory)
-            return True, f"Changed directory to '{virtual_directory}'."
+            return True, ""
 
         except Exception as e:
             return False, f"General error: {e}"
