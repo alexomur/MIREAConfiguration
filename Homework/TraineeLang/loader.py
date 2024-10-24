@@ -1,15 +1,8 @@
 import os
 from typing import Any
-from pyparsing import (
-    Word, alphas, nums, alphanums, Suppress, Literal, QuotedString,
-    Forward, Group, ZeroOrMore, delimitedList, Optional, OneOrMore, restOfLine, Regex, ParserElement
-)
 import yaml
 import operator
-
-class Struct:
-    def __init__(self, **entries):
-        self.__dict__.update(entries)
+import re
 
 # static
 class Loader:
@@ -17,81 +10,181 @@ class Loader:
         raise Exception(f"Class {Loader.__name__} is a static class and cannot be instantiated")
 
     @staticmethod
-    def load_trainee(trainee_text: str) -> Struct:
+    def load_trainee(trainee_text: str) -> Any:
         """
-        Translates text in trn (trainee) language into structure.
+        Translates text in the trn (trainee) language into a structure.
         :param trainee_text: Text in trn (trainee).
         :return: Structure filled with data from the read text.
         """
-        # Enable packrat parsing for performance
-        ParserElement.enablePackrat()
+        # Remove multi-line comments
+        def remove_multiline_comments(text):
+            pattern = r'\(\*.*?\*\)'
+            cleaned_text = re.sub(pattern, '', text, flags=re.DOTALL)
+            return cleaned_text
 
-        # Comments
-        multiline_comment = Suppress('(*') + ZeroOrMore(~Literal('*)') + Regex('.')) + Suppress('*)')
-        comment = multiline_comment
+        cleaned_text = remove_multiline_comments(trainee_text)
 
-        # Identifiers (Names): [A-Z]+
-        identifier = Regex(r'[A-Z]+')
+        # Initialize a dictionary to hold variables
+        variables = {}
 
-        # Numbers
-        number = Regex(r'\d+').setParseAction(lambda t: int(t[0]))
+        # Process each line
+        lines = cleaned_text.strip().split('\n')
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
+            if not line:
+                i += 1
+                continue  # Skip empty lines
 
-        # Strings
-        string = QuotedString('@\"', endQuoteChar='\"', escChar='\\').setParseAction(lambda t: t[0])
+            # Match variable assignment
+            match = re.match(r'^([A-Z]+)\s*:=\s*(.*)$', line)
+            if match:
+                var_name = match.group(1)
+                value_str = match.group(2).strip()
 
-        # Forward declarations
-        value = Forward()
-        expression = Forward()
+                # Check if it's a table
+                if value_str.startswith('table(['):
+                    # Start of a table block
+                    table_lines = []
+                    # Remove 'table([' from the line
+                    remainder = value_str[len('table(['):].strip()
+                    if remainder.endswith('])'):
+                        # Single-line table
+                        table_content = remainder[:-2].strip()
+                        table_lines = [table_content]
+                        i += 1
+                    else:
+                        # Multi-line table
+                        # Add the remainder of the current line if any
+                        if remainder:
+                            table_lines.append(remainder)
+                        i += 1
+                        while i < len(lines):
+                            table_line = lines[i].strip()
+                            if table_line.endswith('])'):
+                                # End of table block
+                                # Remove '])' from the line
+                                table_line = table_line[:-2].strip()
+                                if table_line:
+                                    table_lines.append(table_line)
+                                break
+                            else:
+                                table_lines.append(table_line)
+                            i += 1
+                        else:
+                            raise ValueError("Table definition not closed with '])'")
 
-        # Arrays: { value, value, ... }
-        array = Suppress('{') + Optional(delimitedList(value)) + Suppress('}')
-        array.setParseAction(lambda t: list(t))
+                    # Combine table lines into a single string and split by commas
+                    table_content = ' '.join(table_lines)
+                    # Split the content by commas, accounting for possible commas within braces or parentheses
+                    items = Loader.split_table_items(table_content)
 
-        # Dictionaries (Tables): table([ name = value, ... ])
-        key_value = Group(identifier + Suppress('=') + value)
-        table = Suppress('table([') + Optional(delimitedList(key_value)) + Suppress('])')
-        table.setParseAction(lambda t: dict(t))
+                    # Parse the table
+                    table = {}
+                    for item in items:
+                        table_line = item.strip()
+                        if not table_line:
+                            continue  # Skip empty items
+                        # Match key-value pairs inside the table
+                        kv_match = re.match(r'^([A-Z]+)\s*=\s*(.*)$', table_line)
+                        if kv_match:
+                            key = kv_match.group(1)
+                            value_str = kv_match.group(2).strip()
 
-        # Constants dictionary for storing constant values
-        constants = {}
+                            # Parse the value
+                            value = Loader.parse_value(value_str, variables)
+                            table[key] = value
+                        else:
+                            raise ValueError(f"Invalid syntax in table: {table_line}")
 
-        # Helper function to get value
-        def get_constant_value(token):
-            if token in constants:
-                return constants[token]
+                    # Assign the table to the variable
+                    variables[var_name] = table
+                    i += 1
+                else:
+                    # Parse the value
+                    value = Loader.parse_value(value_str, variables)
+                    # Assign the variable
+                    variables[var_name] = value
+                    i += 1
             else:
-                raise ValueError(f"Unknown constant '{token}'")
+                raise ValueError(f"Invalid syntax: {line}")
+        return variables
 
-        # Expressions (Postfix notation)
-        def parse_expression(tokens):
-            return Loader.evaluate_expression(tokens, constants)
+    @staticmethod
+    def split_table_items(table_content):
+        """
+        Split table content into key-value pairs, handling nested structures.
+        """
+        items = []
+        current_item = ''
+        brace_count = 0
+        for char in table_content:
+            if char == '{' or char == '(' or char == '[':
+                brace_count += 1
+            elif char == '}' or char == ')' or char == ']':
+                brace_count -= 1
+            if char == ',' and brace_count == 0:
+                items.append(current_item)
+                current_item = ''
+            else:
+                current_item += char
+        if current_item:
+            items.append(current_item)
+        return items
 
-        const_expr = Suppress('!(') + OneOrMore(Regex(r'[^\s)]+')) + Suppress(')')
-        const_expr.setParseAction(parse_expression)
+    @staticmethod
+    def parse_value(value_str, variables):
+        """
+        Parse a value string and return the corresponding Python value.
+        """
+        value_str = value_str.strip()
+        if value_str.isdigit():
+            # Integer value
+            return int(value_str)
+        elif value_str.startswith('@\"') and value_str.endswith('\"'):
+            # String value
+            return value_str[2:-1]  # Remove @" and ending "
+        elif value_str.startswith('!(') and value_str.endswith(')'):
+            # Expression
+            expr = value_str[2:-1]  # Remove ! and surrounding parentheses
+            tokens = expr.strip().split()
+            return Loader.evaluate_expression(tokens, variables)
+        elif value_str.startswith('{') and value_str.endswith('}'):
+            # Array
+            array_content = value_str[1:-1].strip()  # Remove { and }
+            items = Loader.split_array_items(array_content)
+            value = []
+            for item_str in items:
+                item_value = Loader.parse_value(item_str, variables)
+                value.append(item_value)
+            return value
+        elif value_str in variables:
+            # Variable assignment from another variable
+            return variables[value_str]
+        else:
+            raise ValueError(f"Invalid value: {value_str}")
 
-        # Values can be number, string, array, table, const_expr, or identifier (constant)
-        value <<= number | string | array | table | const_expr | identifier.setParseAction(lambda t: get_constant_value(t[0]))
-
-        # Constant declaration: NAME := value
-        def parse_const_decl(t):
-            name = t[0]
-            val = t[1]
-            constants[name] = val
-
-        const_decl = Group(identifier + Suppress(':=') + value)
-        const_decl.setParseAction(parse_const_decl)
-
-        # Statements
-        statement = const_decl
-
-        # The overall grammar
-        grammar = ZeroOrMore(comment | statement)
-
-        # Parse the input
-        grammar.parseString(trainee_text, parseAll=True)
-
-        # Build the structure
-        return Struct(**constants)
+    @staticmethod
+    def split_array_items(array_content):
+        """
+        Split array content into items, handling nested structures.
+        """
+        items = []
+        current_item = ''
+        brace_count = 0
+        for char in array_content:
+            if char == '{' or char == '(' or char == '[':
+                brace_count += 1
+            elif char == '}' or char == ')' or char == ']':
+                brace_count -= 1
+            if char == ',' and brace_count == 0:
+                items.append(current_item)
+                current_item = ''
+            else:
+                current_item += char
+        if current_item:
+            items.append(current_item)
+        return items
 
     @staticmethod
     def evaluate_expression(tokens, constants):
@@ -107,18 +200,24 @@ class Loader:
         }
 
         functions = {
-            'ord()': lambda x: ord(x) if isinstance(x, str) and len(x) == 1 else ValueError("ord() expects a single character"),
+            'ord': lambda x: ord(x) if isinstance(x, str) and len(x) == 1 else ValueError("ord() expects a single character"),
         }
 
         for token in tokens:
             if token in operators:
+                if len(stack) < 2:
+                    raise ValueError("Insufficient operands for operator")
                 b = stack.pop()
                 a = stack.pop()
                 result = operators[token](a, b)
                 stack.append(result)
             elif token in functions:
+                if not stack:
+                    raise ValueError("Insufficient operands for function")
                 a = stack.pop()
                 result = functions[token](a)
+                if isinstance(result, Exception):
+                    raise result
                 stack.append(result)
             else:
                 if token.isdigit():
@@ -129,7 +228,6 @@ class Loader:
                     stack.append(constants[token])
                 else:
                     raise ValueError(f"Unknown token '{token}' in expression")
-
         if len(stack) != 1:
             raise ValueError("Invalid expression")
         return stack[0]
@@ -137,29 +235,33 @@ class Loader:
     @staticmethod
     def get_yaml(struct: Any) -> str:
         """
-        Translates any type of object with any fields to yaml
-        :param struct: Object to save
-        :return: Configuration in yaml
+        Translates any type of object with any fields to YAML.
+        :param struct: Object to save.
+        :return: Configuration in YAML.
         """
-        return yaml.dump(struct.__dict__, allow_unicode=True)
+        return yaml.dump(struct, allow_unicode=True)
 
 if __name__ == "__main__":
-    # Path to the test.trn file in the tests folder
-    test_file_path = os.path.join('tests', 'test.trn')
+    # Path to the sample.trn file in the tests folder
+    test_file_path = os.path.join('tests', 'sample.trn')
 
     try:
-        # Read the content of the test.trn file
+        # Read the contents of the sample.trn file
         with open(test_file_path, 'r', encoding='utf-8') as file:
             trainee_text = file.read()
 
         # Load the configuration using the Loader class
         struct = Loader.load_trainee(trainee_text)
 
-        # Convert the structure to YAML format
-        yaml_output = Loader.get_yaml(struct)
+        if struct is not None:
+            # Convert the structure to YAML format
+            yaml_output = Loader.get_yaml(struct)
 
-        # Print the YAML output to the console
-        print(yaml_output)
+            # Output YAML to the console
+            print(yaml_output)
+        else:
+            print("Failed to parse the configuration.")
+
     except FileNotFoundError:
         print(f"File '{test_file_path}' not found.")
     except Exception as e:
