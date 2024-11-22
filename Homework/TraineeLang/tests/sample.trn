@@ -1,0 +1,12 @@
+(* Это многострочный комментарий *)
+INT := 25
+STR := @"Hello, World!"
+SUMONE := !(10 5 +)
+SUMTWO := !(SUMONE 10 +)
+ORD := !(@"0" ord)
+ARRAY := { 1, 2, SUMONE }
+TABLE := table([
+    NAMEONE = 25,
+    NAMETWO = { 2, 3, 5 },
+    NAMETHREE = @"test"
+])

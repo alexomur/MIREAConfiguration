@@ -1,0 +1,14 @@
+(*
+Многострочный комментарий
+*)
+INT := 1000
+STRING := @"Строка"
+ARRAY := { 1, 2, 3, 4 }
+TABLE := table([
+        FIRST = 10,
+        SECOND = 100,
+        THIRD = 1000
+])
+
+PLUS := !(INT 50 +)
+ORD := !(@"a" ord())
